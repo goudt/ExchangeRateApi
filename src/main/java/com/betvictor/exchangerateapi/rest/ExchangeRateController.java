@@ -1,7 +1,10 @@
 package com.betvictor.exchangerateapi.rest;
 
+import com.betvictor.exchangerateapi.model.ExchangeRate;
+import com.betvictor.exchangerateapi.model.ExchangeRateDto;
 import com.betvictor.exchangerateapi.service.ExchangeRateService;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,15 +21,32 @@ public class ExchangeRateController {
         this.exchangeRateService = exchangeRateService;
     }
 
-    @GetMapping(value = "/{fromCurrency}/{fromAmmount}/{toCurrency}")
+    @GetMapping(value = "/{fromCurrency}/{fromAmount}/{toCurrency}")
     @ResponseStatus(HttpStatus.OK)
-    public String getExchangeRate(@PathVariable Double fromAmmount,
-                                  @PathVariable String fromCurrency,
-                                  @PathVariable String toCurrency){
+    public ResponseEntity<ExchangeRateDto> getExchangedAmount(@PathVariable String fromCurrency,
+                                                           @PathVariable Double fromAmount,
+                                                           @PathVariable String toCurrency){
         //String latestExchangeRates = exchangeRateService.getLatestExchangeRates();
-        String latestExchangeRates = exchangeRateService.getExchangeRate(fromCurrency, toCurrency);
-        System.out.println(latestExchangeRates);
-        return latestExchangeRates;
+        ExchangeRate latestExchangeRates = exchangeRateService.getExchangeRate(fromCurrency, toCurrency);
+        return new ResponseEntity<>(ExchangeRateDto.builder()
+                .from(fromCurrency)
+                .to(toCurrency)
+                .amount(fromAmount)
+                .result(latestExchangeRates.getRatio() * fromAmount)
+                .build(), HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/{fromCurrency}/{toCurrency}")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<ExchangeRateDto> getExchangeRate(@PathVariable String fromCurrency,
+                                                           @PathVariable String toCurrency){
+        ExchangeRate latestExchangeRates = exchangeRateService.getExchangeRate(fromCurrency, toCurrency);
+        return new ResponseEntity<>(ExchangeRateDto.builder()
+                .from(fromCurrency)
+                .to(toCurrency)
+                .amount((double) 1l)
+                .result(latestExchangeRates.getRatio())
+                .build(), HttpStatus.OK);
     }
 
 

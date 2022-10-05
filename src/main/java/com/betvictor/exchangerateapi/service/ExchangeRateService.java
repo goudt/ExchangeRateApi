@@ -1,51 +1,58 @@
 package com.betvictor.exchangerateapi.service;
 
+import com.betvictor.exchangerateapi.model.ExchangeRate;
+import com.betvictor.exchangerateapi.model.ExchangeRateDto;
+import org.json.JSONObject;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
+import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Service
 public class ExchangeRateService {
 
     private final RestTemplate restTemplate;
 
-    public ExchangeRateService(RestTemplateBuilder builder) {
+    private final CacheService cacheService;
+
+    public ExchangeRateService(RestTemplateBuilder builder, InMemoryCacheService cacheService) {
         this.restTemplate = builder.build();
+        this.cacheService = cacheService;
     }
 
 
-    public String getLatestExchangeRates(){
+    public String getLatestExchangeRates() {
         return restTemplate.getForObject("https://api.exchangerate.host/latest", String.class);
     }
 
-    public String getExchangeRate(String fromCurrency, String toCurrency){
-        URI targetUrl= UriComponentsBuilder.fromUriString("https://api.exchangerate.host/")  // Build the base link
-                .path("/convert")                            // Add path
-                .queryParam("from", fromCurrency)
-                .queryParam("to", toCurrency)// Add one or more query params
-                .build()                                                 // Build the URL
-                .encode()                                                // Encode any URI items that need to be encoded
-                .toUri();
-        return restTemplate.getForObject(targetUrl, String.class);
+    public ExchangeRate getExchangeRate(String fromCurrency, String toCurrency) {
+        Optional<ExchangeRate> exchangeRate = cacheService.retrieveRate(fromCurrency, toCurrency)
+                .or(() -> {
+                    URI targetUrl = UriComponentsBuilder.fromUriString("https://api.exchangerate.host/")
+                            .path("/convert")
+                            .queryParam("from", fromCurrency)
+                            .queryParam("to", toCurrency)
+                            .build()
+                            .encode()
+                            .toUri();
+                    String resultStr = restTemplate.getForObject(targetUrl, String.class);
+                    JSONObject resultJson = new JSONObject(resultStr);
+                    ExchangeRate result = ExchangeRate.builder()
+                            .from(fromCurrency)
+                            .to(toCurrency)
+                            .ratio(resultJson.getJSONObject("info").getDouble("rate"))
+                            .date(LocalDateTime.now())
+                            .build();
+
+                        cacheService.storeRate(result);
+
+                    return Optional.of(result);
+                });
+        return exchangeRate.orElseThrow(); //fixme
     }
-
-//    https://api.exchangerate.host/convert?from=USD&to=EUR
-
-
-//    public RestTemplate restTemplate(RestTemplateBuilder builder) {
-//        return builder.build();
-//    }
-
-//    @Bean
-//    public CommandLineRunner run(RestTemplate restTemplate) throws Exception {
-//        return args -> {
-//            String response = restTemplate.getForObject(
-//                    "https://api.exchangerate.host/latest", String.class);
-//            log.info(response);
-//        };
-//    }
 
 }
