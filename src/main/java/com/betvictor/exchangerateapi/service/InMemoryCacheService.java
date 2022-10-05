@@ -6,7 +6,9 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -16,6 +18,9 @@ public class InMemoryCacheService extends CacheService {
 
     @Value("${cache.duration.in.minutes}")
     private int cacheDuration;
+
+    @Value("#{'${cache.currency.codes}'.split(',')}")
+    private List<String> currencyCodes;
 
     @Override
     Optional<ExchangeRate> retrieveRate(String from, String to) {
@@ -31,6 +36,12 @@ public class InMemoryCacheService extends CacheService {
 
         return (rate != null && timespam < cacheDuration
                 ? Optional.of(rate) : Optional.empty());
+    }
+
+    @Override
+    List<ExchangeRate> retrieveRates(String from) {
+        // TODO
+        return Collections.emptyList();
     }
 
     @Override

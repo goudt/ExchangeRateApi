@@ -1,5 +1,6 @@
 package com.betvictor.exchangerateapi.rest;
 
+import com.betvictor.exchangerateapi.service.ExchangeRateService;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -21,11 +22,11 @@ public class AbstractControllerTest {
     protected MockMvc mockMvc;
 
     @MockBean
-    protected ExchangeRateController exchangeRateController;
+    protected ExchangeRateService exchangeRateService;
 
     @Before
     public void setUp() {
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
-        Mockito.reset(exchangeRateController);
+        Mockito.reset(exchangeRateService);
     }
 }
