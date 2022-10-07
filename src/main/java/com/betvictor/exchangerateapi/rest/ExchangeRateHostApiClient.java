@@ -23,8 +23,7 @@ public class ExchangeRateHostApiClient {
         return restTemplate.getForObject(targetUrl, String.class);
     }
 
-
-    public String retreiveRateFrom3rdParty(String fromCurrency, String toCurrency) {
+    public String retrieveRateFrom3rdParty(String fromCurrency, String toCurrency) {
         URI targetUrl = UriComponentsBuilder.fromUriString("https://api.exchangerate.host/")
                 .path("/convert")
                 .queryParam("from", fromCurrency)

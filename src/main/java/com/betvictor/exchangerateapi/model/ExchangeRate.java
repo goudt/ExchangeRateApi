@@ -19,7 +19,7 @@ public class ExchangeRate {
         return ExchangeRate.builder()
                 .to(this.from)
                 .from(this.to)
-                .ratio(this.ratio==null || this.ratio == Double.valueOf(0l) ? 0 : 1 / ratio)
+                .ratio(this.ratio == null || Double.valueOf(0l).equals(this.ratio) ? 0 : 1 / ratio)
                 .date(this.date)
                 .build();
     }

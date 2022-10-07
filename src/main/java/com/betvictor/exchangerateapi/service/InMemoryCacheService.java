@@ -2,20 +2,22 @@ package com.betvictor.exchangerateapi.service;
 
 import com.betvictor.exchangerateapi.model.CacheInputDto;
 import com.betvictor.exchangerateapi.model.ExchangeRate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 @Service
 public class InMemoryCacheService extends CacheService {
+
+    private static final Logger log = LoggerFactory.getLogger(InMemoryCacheService.class);
+
     public static final String KEY_PATTERN_STR = "%s->%s";
     private static ConcurrentHashMap<String, ExchangeRate> cacheMap = new ConcurrentHashMap<>();
 
@@ -34,7 +36,7 @@ public class InMemoryCacheService extends CacheService {
         if (rate != null) {
             timespam = Math.abs(ChronoUnit.MINUTES.between(LocalDateTime.now(), rate.getDate()));
             if (timespam < cacheDuration) {
-                System.out.println(String.format("Retrieved %s from cache", rate));
+                log.info(String.format("Retrieved %s from cache", rate));
             }
         }
 

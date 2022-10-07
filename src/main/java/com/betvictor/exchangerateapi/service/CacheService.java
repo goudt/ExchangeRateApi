@@ -9,15 +9,17 @@ import java.util.stream.Collectors;
 
 public abstract class CacheService {
     abstract Optional<ExchangeRate> retrieveRate(CacheInputDto inputDto);
+
     abstract void storeRate(ExchangeRate exchangeRate);
 
-    public List<Optional<ExchangeRate>> retrieveRatesList (List<CacheInputDto> inputDto){
+    public List<Optional<ExchangeRate>> retrieveRatesList(List<CacheInputDto> inputDto) { //FIXME find a more suitable api endpoint
         return inputDto.stream().map(this::retrieveRate).collect(Collectors.toList());
     }
-    void storeRateList(List<ExchangeRate> exchangeRates){
-        Thread storingThread = new Thread(()->{
-            exchangeRates.forEach(er -> storeRate(er));
-        });
-        storingThread.run();
+
+    void storeRateList(List<ExchangeRate> exchangeRates) {
+        Thread storingThread = new Thread(() ->
+            exchangeRates.forEach(this::storeRate)
+        );
+        storingThread.start();
     }
 }
