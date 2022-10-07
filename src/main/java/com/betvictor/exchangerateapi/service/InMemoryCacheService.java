@@ -29,6 +29,7 @@ public class InMemoryCacheService extends CacheService {
 
     @Override
     Optional<ExchangeRate> retrieveRate(CacheInputDto cacheInputDto) {
+
         ExchangeRate rate = cacheMap.get(String.format(KEY_PATTERN_STR, cacheInputDto.getFromCurrency(),
                 cacheInputDto.getToCurrency()));
         long timespam = cacheDuration;
